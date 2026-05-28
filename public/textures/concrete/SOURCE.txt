@@ -1,0 +1,7 @@
+Concrete PBR texture source (CC0):
+https://polyhaven.com/a/concrete_wall_003
+
+Downloaded maps:
+- concrete_basecolor_1k.jpg
+- concrete_normal_1k.png
+- concrete_roughness_1k.jpg
