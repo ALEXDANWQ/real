@@ -26,7 +26,10 @@ const MINIMAL_MARKER_ICON = `data:image/svg+xml;charset=UTF-8,${encodeURICompone
   </svg>
 `)}`;
 
-type MapStatus = 'loading' | 'ready' | 'error' | 'no-key';
+type MapStatus = 'loading' | 'ready' | 'error' | 'no-key' | 'fallback';
+
+const FALLBACK_BBOX_DELTA_LON = 0.035;
+const FALLBACK_BBOX_DELTA_LAT = 0.02;
 
 type ContactItemProps = {
   icon: typeof MapPin;
@@ -51,10 +54,18 @@ export function FactoryLocationMap() {
   const mapRef = useRef<YMapInstance | null>(null);
   const markerRef = useRef<YPlacemarkInstance | null>(null);
   const resolvedApiKey = resolveYandexMapsApiKey();
+  const fallbackMapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(
+    [
+      FACTORY_LOCATION.longitude - FALLBACK_BBOX_DELTA_LON,
+      FACTORY_LOCATION.latitude - FALLBACK_BBOX_DELTA_LAT,
+      FACTORY_LOCATION.longitude + FALLBACK_BBOX_DELTA_LON,
+      FACTORY_LOCATION.latitude + FALLBACK_BBOX_DELTA_LAT,
+    ].join(','),
+  )}&layer=mapnik&marker=${encodeURIComponent(`${FACTORY_LOCATION.latitude},${FACTORY_LOCATION.longitude}`)}`;
 
   useEffect(() => {
     if (!resolvedApiKey) {
-      setStatus('no-key');
+      setStatus('fallback');
       setErrorMessage(null);
       return;
     }
@@ -112,7 +123,7 @@ export function FactoryLocationMap() {
         setStatus('ready');
       } catch (error: unknown) {
         if (canceled) return;
-        setStatus('error');
+        setStatus('fallback');
         setErrorMessage(error instanceof Error ? error.message : 'Не удалось загрузить карту.');
       }
     };
@@ -135,7 +146,17 @@ export function FactoryLocationMap() {
       <div className="relative h-[clamp(380px,63vh,680px)]">
         <div ref={mapContainerRef} className="pointer-events-none h-full w-full ymap-minimal" />
 
-        {status !== 'ready' && (
+        {status === 'fallback' && (
+          <iframe
+            title="Резервная карта"
+            src={fallbackMapSrc}
+            className="absolute inset-0 h-full w-full border-0"
+            loading="eager"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        )}
+
+        {status !== 'ready' && status !== 'fallback' && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center bg-card/60">
             <div className="glass-overlay rounded-2xl border border-border/75 px-5 py-4 text-center shadow-[0_16px_30px_-22px_hsl(var(--primary)/0.32)]">
               {status === 'loading' && <p className="text-sm font-medium text-foreground">Загрузка карты...</p>}
