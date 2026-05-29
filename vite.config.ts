@@ -9,14 +9,22 @@ function normalizeBasePath(basePath: string) {
     return "/";
   }
 
+  if (trimmed === "." || trimmed === "./") {
+    return "./";
+  }
+
   const withLeadingSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
   return withLeadingSlash.endsWith("/") ? withLeadingSlash : `${withLeadingSlash}/`;
 }
 
-function resolveGithubPagesBase() {
+function resolveBasePath(command: "serve" | "build") {
   const explicitBasePath = process.env.VITE_BASE_PATH;
   if (explicitBasePath) {
     return normalizeBasePath(explicitBasePath);
+  }
+
+  if (command === "build") {
+    return "./";
   }
 
   if (process.env.GITHUB_ACTIONS !== "true") {
@@ -32,8 +40,8 @@ function resolveGithubPagesBase() {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  base: resolveGithubPagesBase(),
+export default defineConfig(({ command, mode }) => ({
+  base: resolveBasePath(command),
   server: {
     host: "::",
     port: 8080,

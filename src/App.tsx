@@ -9,8 +9,27 @@ import NotFound from "./pages/NotFound";
 import { useDisableIosPullToRefresh } from "@/hooks/use-disable-ios-pull-to-refresh";
 
 const queryClient = new QueryClient();
-const routerBaseName =
-  import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "");
+
+function resolveRouterBaseName() {
+  const configuredBase = import.meta.env.BASE_URL;
+  if (configuredBase && configuredBase !== "/" && configuredBase !== "./") {
+    return configuredBase.replace(/\/$/, "");
+  }
+
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  const hostname = window.location.hostname.toLowerCase();
+  if (!hostname.endsWith(".github.io")) {
+    return undefined;
+  }
+
+  const [repoSegment] = window.location.pathname.split("/").filter(Boolean);
+  return repoSegment ? `/${repoSegment}` : undefined;
+}
+
+const routerBaseName = resolveRouterBaseName();
 
 const App = () => {
   useDisableIosPullToRefresh();

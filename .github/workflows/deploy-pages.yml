@@ -39,7 +39,7 @@ jobs:
 
       - name: Build
         env:
-          VITE_YMAPS_API_KEY: ${{ secrets.MAPY }}
+          VITE_YMAPS_API_KEY: ${{ secrets.VITE_YMAPS_API_KEY || secrets.MAPY || vars.VITE_YMAPS_API_KEY || vars.MAPY }}
           CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
           PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
         run: |
