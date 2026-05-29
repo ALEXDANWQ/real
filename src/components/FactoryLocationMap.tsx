@@ -52,19 +52,6 @@ export function FactoryLocationMap() {
   const markerRef = useRef<YPlacemarkInstance | null>(null);
   const resolvedApiKey = resolveYandexMapsApiKey();
 
-  const staticMapParams = new URLSearchParams({
-    lang: 'ru_RU',
-    ll: `${FACTORY_LOCATION.longitude},${FACTORY_LOCATION.latitude}`,
-    z: String(INITIAL_ZOOM),
-    size: '1600,900',
-    pt: `${FACTORY_LOCATION.longitude},${FACTORY_LOCATION.latitude},pm2blm`,
-    maptype: 'map',
-  });
-  if (resolvedApiKey) {
-    staticMapParams.set('apikey', resolvedApiKey);
-  }
-  const staticMapSrc = `https://static-maps.yandex.ru/v1?${staticMapParams.toString()}`;
-
   useEffect(() => {
     if (!resolvedApiKey) {
       setStatus('no-key');
@@ -147,16 +134,6 @@ export function FactoryLocationMap() {
     <div className="surface-panel relative overflow-hidden rounded-[1.75rem] border-border/75">
       <div className="relative h-[clamp(380px,63vh,680px)]">
         <div ref={mapContainerRef} className="pointer-events-none h-full w-full ymap-minimal" />
-
-        {status !== 'ready' && (
-          <img
-            src={staticMapSrc}
-            alt=""
-            aria-hidden
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            loading="eager"
-          />
-        )}
 
         {status !== 'ready' && (
           <div className="pointer-events-none absolute inset-0 grid place-items-center bg-card/60">
