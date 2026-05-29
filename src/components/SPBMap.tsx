@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { getTypeIconName, getTypeLabel, spbBuildings, type Building } from '@/data/spbBuildings';
 import { getIconByName } from '@/lib/iconMap';
 import { loadYandexMaps, type YMapInstance, type YPlacemarkInstance } from '@/lib/yandexMapsLoader';
+import { resolveYandexMapsApiKey } from '@/lib/yandexMapsApiKey';
 
 type MapStatus = 'loading' | 'ready' | 'error' | 'no-key';
 
@@ -172,7 +173,7 @@ export function SPBMap({ apiKey }: SPBMapProps) {
   const selectedPlacemarkIdRef = useRef<string | null>(null);
   const ymapsLoadedRef = useRef<Awaited<ReturnType<typeof loadYandexMaps>> | null>(null);
 
-  const resolvedApiKey = (apiKey ?? import.meta.env.VITE_YMAPS_API_KEY ?? '').trim();
+  const resolvedApiKey = (apiKey ?? resolveYandexMapsApiKey()).trim();
 
   const classCounts = useMemo(() => {
     const counts = new Map<string, number>();

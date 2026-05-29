@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { useDisableIosPullToRefresh } from "@/hooks/use-disable-ios-pull-to-refresh";
+import { loadYandexMaps } from "@/lib/yandexMapsLoader";
+import { resolveYandexMapsApiKey } from "@/lib/yandexMapsApiKey";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const routerBaseName = resolveRouterBaseName();
 
 const App = () => {
   useDisableIosPullToRefresh();
+  const yandexMapsApiKey = resolveYandexMapsApiKey();
 
   useEffect(() => {
     const blockContextMenu = (event: MouseEvent) => {
@@ -44,6 +47,16 @@ const App = () => {
       document.removeEventListener("contextmenu", blockContextMenu);
     };
   }, []);
+
+  useEffect(() => {
+    if (!yandexMapsApiKey) {
+      return;
+    }
+
+    loadYandexMaps(yandexMapsApiKey, { fetchPriority: "high" }).catch(() => {
+      // The map sections include retry and fallback UI, so warmup failures are non-fatal.
+    });
+  }, [yandexMapsApiKey]);
 
   return (
     <QueryClientProvider client={queryClient}>

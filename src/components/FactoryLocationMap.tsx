@@ -1,6 +1,7 @@
-﻿import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Clock3, Info, Mail, MapPin, Phone } from 'lucide-react';
 import { loadYandexMaps, type YMapInstance, type YPlacemarkInstance } from '@/lib/yandexMapsLoader';
+import { resolveYandexMapsApiKey } from '@/lib/yandexMapsApiKey';
 
 const FACTORY_LOCATION = {
   title: 'Бетонный завод',
@@ -49,7 +50,7 @@ export function FactoryLocationMap() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<YMapInstance | null>(null);
   const markerRef = useRef<YPlacemarkInstance | null>(null);
-  const resolvedApiKey = (import.meta.env.VITE_YMAPS_API_KEY ?? '').trim();
+  const resolvedApiKey = resolveYandexMapsApiKey();
 
   const staticMapParams = new URLSearchParams({
     lang: 'ru_RU',
@@ -129,29 +130,10 @@ export function FactoryLocationMap() {
       }
     };
 
-    type IdleWindow = Window & {
-      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-      cancelIdleCallback?: (handle: number) => void;
-    };
-
-    const idleWindow = window as IdleWindow;
-    let disposeScheduledBoot: (() => void) | null = null;
-
-    if (idleWindow.requestIdleCallback) {
-      const idleId = idleWindow.requestIdleCallback(() => {
-        void bootMap();
-      }, { timeout: 1200 });
-      disposeScheduledBoot = () => idleWindow.cancelIdleCallback?.(idleId);
-    } else {
-      const timerId = window.setTimeout(() => {
-        void bootMap();
-      }, 180);
-      disposeScheduledBoot = () => window.clearTimeout(timerId);
-    }
+    void bootMap();
 
     return () => {
       canceled = true;
-      disposeScheduledBoot?.();
       if (mapRef.current && markerRef.current) {
         mapRef.current.geoObjects.remove(markerRef.current);
       }
@@ -172,7 +154,7 @@ export function FactoryLocationMap() {
             alt=""
             aria-hidden
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            loading="lazy"
+            loading="eager"
           />
         )}
 
