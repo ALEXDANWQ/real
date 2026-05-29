@@ -28,9 +28,6 @@ const MINIMAL_MARKER_ICON = `data:image/svg+xml;charset=UTF-8,${encodeURICompone
 
 type MapStatus = 'loading' | 'ready' | 'error' | 'no-key' | 'fallback';
 
-const FALLBACK_BBOX_DELTA_LON = 0.035;
-const FALLBACK_BBOX_DELTA_LAT = 0.02;
-
 type ContactItemProps = {
   icon: typeof MapPin;
   children: ReactNode;
@@ -54,14 +51,11 @@ export function FactoryLocationMap() {
   const mapRef = useRef<YMapInstance | null>(null);
   const markerRef = useRef<YPlacemarkInstance | null>(null);
   const resolvedApiKey = resolveYandexMapsApiKey();
-  const fallbackMapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(
-    [
-      FACTORY_LOCATION.longitude - FALLBACK_BBOX_DELTA_LON,
-      FACTORY_LOCATION.latitude - FALLBACK_BBOX_DELTA_LAT,
-      FACTORY_LOCATION.longitude + FALLBACK_BBOX_DELTA_LON,
-      FACTORY_LOCATION.latitude + FALLBACK_BBOX_DELTA_LAT,
-    ].join(','),
-  )}&layer=mapnik&marker=${encodeURIComponent(`${FACTORY_LOCATION.latitude},${FACTORY_LOCATION.longitude}`)}`;
+  const fallbackMapSrc = `https://yandex.ru/map-widget/v1/?ll=${encodeURIComponent(
+    `${FACTORY_LOCATION.longitude},${FACTORY_LOCATION.latitude}`,
+  )}&z=${INITIAL_ZOOM}&pt=${encodeURIComponent(
+    `${FACTORY_LOCATION.longitude},${FACTORY_LOCATION.latitude},pm2blm`,
+  )}`;
 
   useEffect(() => {
     if (!resolvedApiKey) {
